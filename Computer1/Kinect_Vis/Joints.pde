@@ -16,6 +16,7 @@ class Joints {
   }
   
   void getMiddle(int userId) {
+    //Simple functions from SimpleOpen NI Library to capture skeleton information
     kinect.getJointPositionSkeleton(userId, SimpleOpenNI.SKEL_TORSO, middle);
     //drawSkel(userId);
   }

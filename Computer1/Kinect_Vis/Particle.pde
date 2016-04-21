@@ -2,37 +2,61 @@ class Particle {
   PVector location;
   PVector velocity;
   PVector acceleration;
-  float lifespan;
-  float velocityMap, gravityMap;
-   color lerp;
-   
+  float lifespan, lifeDecrease, velocityMap, gravity, mass, randomAcc;
+  color particleCol, lerp;
+
   Particle(PVector l) {
-    acceleration = new PVector(1,1);
-    velocity = new PVector(0.05,1); // Sort for next time!!!
-    location = l.get(); //input location vector
-    lifespan = 255.0; //opacity
+    acceleration = new PVector(random(-0.4, 0.4), 0.013);
+    velocity = new PVector(random(-7, 7), random(-7, 7));
+    location = l.get(); //Captures pointcloud origin
     
+    //varied lifespan and size to get a more realistic particle system
+    lifespan = random(150, 255.0);//stroke opacity of particle
+    mass = random(3, 8);//strokeweight of particle
+    randomAcc = random (-1, 1);// for snare interaction horizontal spraying
+    this.lifeDecrease = lifeDecrease;
   }
-  void run(float snare) {
-    update(snare);
+
+  void run(float lifeDecrease) {
+    update(lifeDecrease);
     display();
   }
 
-  void update(float snare) {
-//    color from = color(100,100,100); 
-//    color to = color (202, 0, 42); 
-//    float at = map(lifespan, 255, 140, 0, 1);
-//    lerp = lerpColor (from, to, at);
-    
+  void update(float lifeDecrease) {
     /*Physics*/
+    if (snareOn) {
+        gravity = mass * randomAcc;
+        acceleration.y = 0.1;
+        acceleration.x *= gravity;
+    } else { 
+      gravity = (mass + acceleration.y) / 30;
+    }
+
     velocity.x += acceleration.x;
-    velocity.y -= snare;
+    velocity.y -= gravity;
+
     location.add(velocity);
-    lifespan -= 3.0;
+    lifespan -= lifeDecrease;
+
+    switch(oscMsg.scene) {
+    case 0: 
+      particleCol = color(165, 225, 229);
+      break;
+    case 1: 
+      particleCol = color(252,173,250);
+      break;
+    case 2: 
+      particleCol = color(92,98,210);
+      break;
+    case 3: 
+      particleCol = color(13,250,255);
+      break;
+    }
   }
 
   void display() {
-    stroke(255, lifespan);
+    stroke(particleCol, lifespan);
+    strokeWeight(mass);
     point(location.x, location.y);
   }
 

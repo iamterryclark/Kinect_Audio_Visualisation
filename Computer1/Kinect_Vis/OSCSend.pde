@@ -2,7 +2,7 @@ class OSCMsgSend {
   PVector lHand, rHand;// main joint varibles
 
   float lHandMapX, lHandMapY, lHandMapZ;
-  float rHandMapX, rHandMapY, rHandMapZ; //
+  float rHandMapX, rHandMapY, rHandMapZ;
   float lHandMapDist;
   
   int lHandXTo, lHandXFrom, rHandXTo, rHandXFrom;
@@ -13,7 +13,7 @@ class OSCMsgSend {
 
   int scene = 0;
 
-  boolean isBeatRepeatOn;
+  boolean isBeatRepeatOn, drumReset;
 
   OSCMsgSend() {
   }
@@ -33,14 +33,35 @@ class OSCMsgSend {
     lHandMapDist = map( lHand.dist(rHand),     0,   1000,   lHandDistTo,   lHandDistFrom );
   }
 
-  void sceneInstruments() {   
+  void sceneInstruments() {  
+    if(drumReset){
+      OscBundle sceneInstruments = new OscBundle();
+      OscMessage message = new OscMessage("/live/device");
+      message.add(8); //track
+      message.add(2); //device
+      message.add(4); //parameter drum grid
+      message.add(12); //value 12 - 0
+      sceneInstruments.add(message);
+      message.clear();
+
+      message.setAddrPattern("/live/device");
+      message.add(8); //track
+      message.add(2); //device
+      message.add(2); //parameter drum interval
+      message.add(7); //value 7 - 0
+      sceneInstruments.add(message);
+
+      sceneInstruments.setTimetag(sceneInstruments.now() + 1000); //Set time delaye of bundle being sent
+      sender.send(sceneInstruments, address); //Send to osc address
+      drumReset = false;
+    }
 
     if (scene == 0) {    
       lHandZTo = 127;
       lHandZFrom = 0;
 
-      rHandXTo = 1;
-      rHandXFrom = -1;
+      rHandXTo = -1;
+      rHandXFrom = 1;
 
       /* ------------- */
 
@@ -65,11 +86,11 @@ class OSCMsgSend {
     }
 
     if (scene == 1) {
-      lHandZTo = 3;
-      lHandZFrom = 0;
+      lHandZTo = 1;
+      lHandZFrom = 12;
 
-      rHandXTo = 0;
-      rHandXFrom = 7;
+      rHandXTo = 6;
+      rHandXFrom = 1;
 
       /* ------------- */
 
@@ -93,7 +114,7 @@ class OSCMsgSend {
       sender.send(sceneInstruments, address); //Send to osc address
     }
 
-    if (scene == 2) {
+    if (scene == 2) {      
       lHandZTo = 1;
       lHandZFrom = 0;
 
@@ -127,7 +148,7 @@ class OSCMsgSend {
       message.setAddrPattern("/live/device");
       message.add(1); //track
       message.add(0); //device
-      message.add(1); //parameter 
+      message.add(1); //parameter
       message.add(rHandMapY); //value 0 - 127
       sceneInstruments.add(message);
       message.clear();// After putting message into bundle clear the message
@@ -217,15 +238,9 @@ class OSCMsgSend {
     sender.send(message, address);
   }
 
-//  void stopScene() {
-//    OscMessage message = new OscMessage("/live/stop/");
-//    message.add(scene);
-//    sender.send(message, address);
-//  }
-
   void beatRepeat() {
-    lHandXTo = 3;
-    lHandXFrom = 0;
+    lHandZTo = 6;
+    lHandZFrom = 1;
 
     rHandXTo = 12;
     rHandXFrom = 0;
@@ -238,7 +253,7 @@ class OSCMsgSend {
     OscMessage message = new OscMessage("/live/master/device");
     message.add(0);
     message.add(2); //This is the interval
-    message.add((int)lHandMapX); //Value of the interval
+    message.add((int)lHandMapZ); //Value of the interval
     beatRepeat.add(message);
     message.clear();
 
