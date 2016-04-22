@@ -2,15 +2,21 @@ class SenderClass {
   OscP5         sender; 
   NetAddress    liveAddress;
   NetAddress    fftOut;
-  
+
   float         snare;
+  int           scene;
   SenderClass() {
     sender = new OscP5(this, 12345);
-    liveAddress = new NetAddress("10.40.14.45", 9000); //output to ableton with this machines ip on port 9000 (the liveOsc hack only listens at port 9000)
-    fftOut = new NetAddress("10.40.106.231", 12345); //output to device with ip 10.100.146.184 on port 12345 on same network
+    liveAddress = new NetAddress("10.100.186.137", 9000); //output to ableton with this machines ip on port 9000 (the liveOsc hack only listens at port 9000)
+    fftOut = new NetAddress("10.100.146.184", 12345); //output to device with ip 10.100.146.184 on port 12345 on same network
   }
 
-
+  /*
+  The input function turned out to be unnecessary on account of being ablte 
+  communicate directly with ableton. 
+  Unfourtunately this wasn't discovered until very late in development
+  */
+  
   /*the input function receives typetags and address patterns via the oscEvent listener. These messages are handled internally and then forwarded to ableton*/
   void input (String address) {
     OscMessage myMessage = new OscMessage(address); 
@@ -86,25 +92,12 @@ class SenderClass {
     }
   }
 
-  /*outputs fft values to a second computer*/
-  void fftOutput(float[] input) {
-   OscMessage msg = new OscMessage("/fft/beatDetect"); 
-   msg.add(filter.length);
-   msg.add(input);
-   sender.send(msg, fftOut);
+  void fftOut(float bin1) {
+    if (beatDetect.isKick()) background(250);
+    OscMessage msg = new OscMessage("/fft");
+    msg.add(beatDetect.isKick()); //bass drum detection
+    msg.add(beatDetect.isRange(20, 26, 5)); //snare drum detection
+    //msg.add(bin1);
+    sender.send(msg, fftOut);
   }
-
-  void beatDetection() {
-      if (beatDetect.isRange(20, 26, 5)) {
-        snare = 4;
-      } else {
-        snare = 0;
-      }
- 
-  OscMessage msg = new OscMessage("/fft");
-  msg.add(beatDetect.isKick());
-  msg.add(snare);
-  sender.send(msg, fftOut);
-  }
-  
 }

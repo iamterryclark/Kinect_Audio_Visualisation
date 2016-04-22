@@ -18,7 +18,7 @@ BeatDetect      beatDetect;
 Filter[]        filter;
 
 /*the outputs from the frequency spectrum*/
-float []        output;
+float []        damp;
 
 SenderClass     sender;
 
@@ -29,7 +29,7 @@ void setup () {
   fft = new FFT(input.bufferSize(), input.sampleRate());
   fft.logAverages(10, 2); //start logging fft averages at 10hz, 2 bands per octave
   filter = new Filter[fft.avgSize()]; //set size of filter array to same as fft spectrum
-  output = new float[fft.avgSize()]; //set size of output array to same as fft spectrum
+  damp = new float[fft.avgSize()]; //set size of output array to same as fft spectrum
 
   /*filter array*/
   for (int i= 0; i < filter.length; i++) {
@@ -49,10 +49,15 @@ void draw () {
   fft.forward(input.mix); //forward stereo mix to fft function
   beatDetect.detect(input.mix);
   /* iterate over filter array*/
+  
+  /*
+  We wanted to manipulate the color of the particlesystem based off fft bin 1
+  Due to not having enough time to make it polished we decided to not implement it.
+  */
   for (int i = 0; i < filter.length; i++) {
     filter[i].incr(fft.getBand(i)); //input fftbands to filter class to smooth out rate of change
-    output[i] = filter[i].z; //set each element of output array to a filtered signal
+    damp[i] = filter[i].z; //set each element of output array to a filtered signal
   }
  // sender.fftOutput(output); //output output array to fftOutput function
-  sender.beatDetection();
+  sender.fftOut(damp[1]);
 }
