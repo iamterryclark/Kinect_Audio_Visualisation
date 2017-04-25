@@ -1,5 +1,5 @@
 #A Kinect Audio Visual Installation
-This is a collaboration between [Terry Clark](http://www.terrylewisclark.me) and [Gustaf Svenungsson](http://igor.gold.ac.uk/~gsven001/gustaf/index.html).
+This is a collaboration between [Terry Clark](https://github.com/iamterryclark) and [Gustaf Svenungsson](https://github.com/slasktotten).
 
 Our aim was to create an interactive audiovisual installation using the a 3D Camera and an audio recording software to manipulate sounds.
 
